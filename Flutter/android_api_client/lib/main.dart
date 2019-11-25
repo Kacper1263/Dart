@@ -102,22 +102,56 @@ class APIsState extends State<APIs> {
               appBar: AppBar(
                 title: Text('API result'),
               ),
-              body: Padding(
-                padding: EdgeInsets.all(18),
-                child: Text(htmlResponse, style: TextStyle(fontSize: 15, color: Colors.white))
+              body: SingleChildScrollView(
+                  child: Padding(
+                  padding: EdgeInsets.all(18),
+                  child: Text(htmlResponse, style: TextStyle(fontSize: 15, color: Colors.white))
+                ),
               ),
             );  
           },
         ),    
       );
     } on SocketException catch(e){
-      Navigator.pop(context);
-      htmlResponse = e.toString();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(   // Add 20 lines from here...
+          builder: (BuildContext context) {
+            return Scaffold(         // Add 6 lines from here...
+              backgroundColor: Colors.grey[900],
+              appBar: AppBar(
+                title: Text('API result'),
+              ),
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(18),
+                  child: Text(htmlResponse, style: TextStyle(fontSize: 15, color: Colors.white))
+                ),
+              ),
+            );  
+          },
+        ),    
+      );
       Fluttertoast.showToast(msg: "URL not found", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
     }
     catch(e){
-      Navigator.pop(context);
-      htmlResponse = e.toString();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(   // Add 20 lines from here...
+          builder: (BuildContext context) {
+            return Scaffold(         // Add 6 lines from here...
+              backgroundColor: Colors.grey[900],
+              appBar: AppBar(
+                title: Text('API result'),
+              ),
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(18),
+                  child: Text(htmlResponse, style: TextStyle(fontSize: 15, color: Colors.white))
+                ),
+              ),
+            );  
+          },
+        ),    
+      );
       Fluttertoast.showToast(msg: e.toString(), toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
     }
   }
