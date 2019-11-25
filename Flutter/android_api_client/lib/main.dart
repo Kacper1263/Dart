@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:developer' as prefix0;
 import 'dart:io';
+import 'package:android_api_client/loading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,6 +19,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'API Client',
+      routes: {
+        '/home': (context) => APIs(),
+        '/loading': (context) => Loading(),
+      },
       theme: ThemeData(          // Add the 3 lines from here... 
         primaryColor: Colors.grey[850],
       ),  
@@ -83,14 +88,13 @@ class APIsState extends State<APIs> {
       Fluttertoast.showToast(msg: "You must provide URL of API!", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
       return;
     }
-    Fluttertoast.showToast(msg: "Loading data...", toastLength: Toast.LENGTH_LONG);
+    Navigator.pushNamed(context, "/loading", arguments: {});
     
     try{
       var r = await Requests.get(_ip);   
       htmlResponse = r.content();
       var json = r.json();
-      prefix0.log(json["success"]);
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(   // Add 20 lines from here...
           builder: (BuildContext context) {
             return Scaffold(         // Add 6 lines from here...
@@ -107,9 +111,12 @@ class APIsState extends State<APIs> {
         ),    
       );
     } on SocketException catch(e){
+      Navigator.pop(context);
       htmlResponse = e.toString();
       Fluttertoast.showToast(msg: "URL not found", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
-    }catch(e){
+    }
+    catch(e){
+      Navigator.pop(context);
       htmlResponse = e.toString();
       Fluttertoast.showToast(msg: e.toString(), toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
     }
