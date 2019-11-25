@@ -12,7 +12,7 @@ class _LoadingState extends State<Loading> {
     return WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
-        backgroundColor: Colors.grey[800],
+        backgroundColor: Colors.grey[700],
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
