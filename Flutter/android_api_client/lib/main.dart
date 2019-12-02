@@ -81,21 +81,63 @@ class APIsState extends State<APIs> {
   }
 
   void _api(String _ip, String _request) async{
-    if(_request == "AddOne") addOne(_ip);
+    if(_ip == "" || _ip == null) {
+      Fluttertoast.showToast(msg: "You must provide URL of API!", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
+      return;
+    }  
+    if(_request == "AddOne") {
+      TextEditingController textUser = new TextEditingController();
+      TextEditingController textDescription = new TextEditingController();
+
+      dialog(_ip, textUser,titleText:"User name" , descriptionText:'Provide user name' , hintText: 'E.g. Bob', 
+        onCancel: (){
+          Fluttertoast.showToast(msg: "Canceled", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.grey[700], textColor: Colors.white);
+          Navigator.pop(context);  
+        },
+        onSend: (){
+          Navigator.pop(context);
+          dialog(_ip, textDescription,titleText:"User description" , descriptionText:'Provide user description' , hintText: 'E.g. Developer', 
+            onCancel: (){
+              Fluttertoast.showToast(msg: "Canceled", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.grey[700], textColor: Colors.white);
+              Navigator.pop(context);  
+            },
+            onSend: (){
+              Navigator.pop(context);
+              addOne(_ip, textUser.text, textDescription.text);
+            }      
+          );
+        }      
+      );      
+    }
     else if(_request == "GetOne") {
       TextEditingController textCtrl = new TextEditingController();
+      dialog(_ip, textCtrl,titleText: "Get user", descriptionText: 'Provide user name or ID', hintText: 'E.g. Bob or 142', 
+        onCancel: (){
+          Fluttertoast.showToast(msg: "Canceled", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.grey[700], textColor: Colors.white);
+          Navigator.pop(context);  
+        },
+        onSend: (){
+          Navigator.pop(context);
+          getApi(_ip+"/"+textCtrl.text);          
+        }      
+      );
+    }
+    else getApi(_ip);
+  }
+
+  void dialog(String _ip, TextEditingController textCtrl, {titleText, descriptionText, hintText, onCancel, onSend}){    
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context){
           return AlertDialog(
             backgroundColor: Colors.grey[800],
-            title: Text("Get user",style: TextStyle(color: Colors.white)),
+            title: Text(titleText ,style: TextStyle(color: Colors.white)),
             
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('Provide user name or ID',style: TextStyle(color: Colors.white)),
+                  Text(descriptionText ,style: TextStyle(color: Colors.white)),
                   SizedBox(height: 20),
                   TextField(
                     style: TextStyle(
@@ -106,7 +148,7 @@ class APIsState extends State<APIs> {
                       enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200])),
                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[600])),
                       border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200])),
-                      hintText: 'E.g. Bob or 142',
+                      hintText: hintText,
                       hintStyle: TextStyle(color: Colors.grey[500]),
                     ),
                   ),
@@ -116,32 +158,20 @@ class APIsState extends State<APIs> {
             actions: <Widget>[
               FlatButton(
                 child: Text("Cancel"),
-                onPressed: (){
-                  Fluttertoast.showToast(msg: "Canceled", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.grey[700], textColor: Colors.white);
-                  Navigator.pop(context);  
-                },
+                onPressed: onCancel,
               ),
               FlatButton(
                 child: Text("Send", style: TextStyle(color: Colors.white),),
                 color: Colors.lightGreen,
-                onPressed: (){
-                  Navigator.pop(context);
-                  getApi(_ip+"/"+textCtrl.text);
-                },
+                onPressed: onSend,
               )
             ],
           );
         }
       );
-    }
-    else getApi(_ip);
   }
 
-  void addOne(String _ip) async{
-    if(_ip == "" || _ip == null) {
-      Fluttertoast.showToast(msg: "You must provide URL of API!", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
-      return;
-    }    
+  void addOne(String _ip, String _name, String _description) async{     
     
     try{
       LocalAuthentication auth = LocalAuthentication();
@@ -159,7 +189,11 @@ class APIsState extends State<APIs> {
 
       Navigator.pushNamed(context, "/loading", arguments: {});
 
-      var r = await Requests.get(_ip);   
+      var r = await Requests.post(_ip,
+      json: {
+        "name": _name,
+        "description": _description
+      });   
       htmlResponse = r.content();
       var json = r.json();
       showResult();
@@ -176,10 +210,6 @@ class APIsState extends State<APIs> {
   }
 
   void getApi(String _ip) async{
-    if(_ip == "" || _ip == null) {
-      Fluttertoast.showToast(msg: "You must provide URL of API!", toastLength: Toast.LENGTH_LONG, backgroundColor: Colors.red, textColor: Colors.white);
-      return;
-    }
     Navigator.pushNamed(context, "/loading", arguments: {});
     
     try{
